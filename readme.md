@@ -6,7 +6,7 @@ MultiSigBTC is a project that is created in the context of the subject “Decent
 It is developed from scratch by Kalyvas Emmanouil using the python library [bitcoin-utils](https://github.com/karask/python-bitcoin-utils) developed by Kostas Karasavvas.
 
 ## What does MultiSigBTC do?
-MultiSigBTC is a tool that can be used to create and maintain multi signature addresses that can be used to send and receive funds the Bitcoin blockchain. A multi signature address, is an address that have m owners and requires n of them to agree upon a transaction. MultiSigBTC can theoretically create multi signature addresses with any m and n combination.
+MultiSigBTC is a tool that can be used to create and maintain multi signature addresses that can be used to send and receive funds in the Bitcoin blockchain. A multi signature address, is an address that have m owners and requires n of them to agree upon a transaction. MultiSigBTC can theoretically create multi signature addresses with any m and n combination.
 **Please note that this a an experimental tool that was not tested thoroughly (at least not yet) and it is not recommended using it on mainnet.**
 
 ## How to use?
