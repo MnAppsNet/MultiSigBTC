@@ -33,10 +33,7 @@ parser.add_argument('-h',f'--{args.host}', type=str, nargs=1, default=['127.0.0.
 # Set the output file path #
 #==========================#
 parser.add_argument('-o',f'--{args.output}',dest=args.output,nargs=1,default=None,help=
-'''Write results to file, can be combined with all the commands that return a result. Results are in JSON.
-    Use: -o path --create_* params
-        path : The path to save the results (including the filename)
-''')
+'''Write results to file, can be combined with all the commands that return a result. Results are in JSON.''')
 
 subparser = parser.add_subparsers(title="Commands",dest="command")
 
@@ -103,7 +100,7 @@ get_private_key.add_argument(args.password,nargs=1,help=
 # Get the signed transaction in hex #
 #===================================#
 get_signed_multisig_transaction = subparser.add_parser(args.get_signed_multisig_transaction,description=
-'''Decrypts a private key created with this script using the user password''')
+'''Signs and returns the given transaction''')
 get_signed_multisig_transaction.add_argument(args.transactionFile,nargs=1,help=
 f'''The file containing the details for the transaction and the required signatures (can be created with -o path {args.sign_multisig_transaction})
 You can also provide the json result of {args.sign_multisig_transaction} in place of {args.transactionFile}''')
@@ -112,7 +109,7 @@ You can also provide the json result of {args.sign_multisig_transaction} in plac
 # Get Address Balance #
 #=====================#
 get_address_balance = subparser.add_parser(args.get_address_balance,description=
-'''Decrypts a private key created with this script using the user password''')
+'''Get the balance of the given address''')
 get_address_balance.add_argument(args.addressFile,nargs=1,help=
 f'''A result file containing an address (the file can be cerated with -o path {args.create_new_address} or -o path {args.create_multisig_address})
 You can also set the address string itself''')
@@ -121,7 +118,7 @@ You can also set the address string itself''')
 # Send transaction #
 #==================#
 send_transaction = subparser.add_parser(args.send_transaction,description=
-'''Decrypts a private key created with this script using the user password''')
+'''Sends the transaction to the network''')
 send_transaction.add_argument(args.transactionFile,nargs=1,help=
 f'''A file containing the signed transaction (the file can be cerated with commands -o path {args.get_signed_multisig_transaction} or -o path {args.get_signed_multisig_transaction})
 You can also provide the signed transaction in raw hex format in place of {args.transactionFile}''')
