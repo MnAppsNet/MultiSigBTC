@@ -1,0 +1,38 @@
+#Network constants :
+MAINNET = 'mainnet'
+TESTNET = 'testnet'
+REGTEST = 'regtest'
+
+#Parameters of the UTXO list returned from bitcoin network
+UTXO_TOTAL_AMOUNT = 'total_amount'
+UTXO_UNSPENTS = 'unspents'
+UTXO_UNSPENTS_AMOUNT = 'amount'
+UTXO_UNSPENTS_TXID = 'txid'
+UTXO_UNSPENTS_VOUT = 'vout'
+
+#Argument constants
+class arguments():
+    network = 'network'
+    rpcuser = 'rpc_user'
+    rpcpass = 'rpc_pass'
+    host = 'host'
+    output = 'output'
+    create_new_address = 'create_new_address'
+    keyName = 'key_name'
+    password = 'password'
+    seed = 'seed'
+    create_multisig_address = 'create_multisig_address'
+    signaturesRequired = 'signatures_required'
+    create_multisig_transaction = 'create_multisig_transaction'
+    address = 'address'
+    amount = 'amount'
+    fee = 'fee'
+    multisigKeyFile = 'multisig_key_file'
+    sign_multisig_transaction = 'sign_multisig_transaction'
+    transactionFile = 'transaction_file'
+    keyFile = 'key_file'
+    get_private_key = 'get_private_key'
+    get_signed_multisig_transaction = 'get_signed_multisig_transaction'
+    get_address_balance = 'get_address_balance'
+    addressFile = 'address_file'
+    send_transaction = 'send_transaction'
