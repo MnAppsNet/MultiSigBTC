@@ -4,8 +4,9 @@ from pathlib import Path
 from bitcoin import Bitcoin
 from exceptions import INVALID_PUBLIC_KEY, INVALID_PATH, INVALID_PARAMETER, INVALID_INPUT, INVALID_ADDRESS, NOT_ENOUGH_SIGNATURES, AMOUNT_NOT_FLOAT, KEY_NAME_NOT_FOUND, NOT_CORRECT_FILE
 from tools import Output
+from constants import AddressType
 
-def createMultisigAddress(signaturesRequired:int,keys:list,bitcoin:Bitcoin,path:str = None):
+def createMultisigAddress(signaturesRequired:int,keys:list,type:str,bitcoin:Bitcoin, path:str = None):
     '''
     Create a new Multi Signature Address
         signaturesRequired  : number of signatures required to unlock a UTXO
@@ -63,7 +64,7 @@ def createMultisigAddress(signaturesRequired:int,keys:list,bitcoin:Bitcoin,path:
 
     multisigAddress.sortKeys() #<= Sort keys by name to keep the same order every time we create the script
     redeem_script = bitcoin.createMultisigScript(multisigAddress.getNumberOfRequiredSignatures(),multisigAddress.getKeys())
-    address = bitcoin.getAddressFromScript(redeem_script)
+    address = bitcoin.getAddressFromScript(redeem_script,type)
     multisigAddress.addAddress(address)
     multisigAddress.addScript(redeem_script)
 
@@ -74,7 +75,7 @@ def createMultisigAddress(signaturesRequired:int,keys:list,bitcoin:Bitcoin,path:
 
     return multisigAddress.getOutput()
 
-def createNewAddress(name:str,password:str,seed:str,bitcoin:Bitcoin,path:str = None):
+def createNewAddress(name:str,password:str,type:str,seed:str,bitcoin:Bitcoin,path:str = None):
     '''
     Create a new Public - Private key pair and the corresponding address
         name    : name of the address
@@ -83,9 +84,9 @@ def createNewAddress(name:str,password:str,seed:str,bitcoin:Bitcoin,path:str = N
         bitcoin : An instance of the class Bitcoin
         path    : Path to save the results
     '''
-    address = tools.Output(Output.P2PKH_ADDRESS)
+    address = tools.Output(Output.ADDRESS)
 
-    privKey, publicKey, btcAddress = bitcoin.createKeys(seed)
+    privKey, publicKey, btcAddress = bitcoin.createKeys(type,seed)
     address.addKey(name,publicKey,privKey,password)
     address.addAddress(btcAddress)
     if path != None:
@@ -129,12 +130,15 @@ def createMultisigTransaction(receiver:str,amount,fee,file,bitcoin:Bitcoin,path:
         fee = float(fee)
     except:
         raise AMOUNT_NOT_FLOAT
-    rawTransaction = bitcoin.createTransaction(amount,fee,sender,receiver)
+    UTXOs =  bitcoin.getUTXOs(sender)
+    rawTransaction = bitcoin.createTransaction(amount,fee,sender,receiver,UTXOs)
     transaction = Output(Output.MULTISIG_TRANSACTION)
     transaction.addUnsignedTransaction(rawTransaction)
     transaction.addKeys(keys.getKeys())
     transaction.addScript(keys.getScript())
     transaction.addNumberOfRequiredSignatures(keys.getNumberOfRequiredSignatures())
+    transaction.addSegwitFlag(bitcoin.isSegwitAddress(sender))
+    transaction.addUtxos(UTXOs.getUTXOs())
 
     #Save results if a path is provided :
     if path != None:
@@ -151,7 +155,7 @@ def getPrivateKey(encrypted,password):
         password  : password to unlock private key
     '''
 
-    settings = tools.Output(Output.P2PKH_ADDRESS)
+    settings = tools.Output(Output.ADDRESS)
 
     if Path(encrypted).is_file():
         settings.load(encrypted)
@@ -188,7 +192,7 @@ def signMultisigTransaction(transaction,addressFile_or_key,password_or_name,bitc
     if not Path(addressFile_or_key).is_file():
         #Expecting the private key itself if not address, this means that instead of a password we expect the name
         key = addressFile_or_key
-        address = Output(Output.P2PKH_ADDRESS)
+        address = Output(Output.ADDRESS)
         address.addKey(None,None,key)
         expectingName = True
     else:
@@ -205,11 +209,16 @@ def signMultisigTransaction(transaction,addressFile_or_key,password_or_name,bitc
     keyName = address.getKeyName()
     rawTransactionHex = transaction.getUnsignedTransaction()
     redeemScript = transaction.getScript()
+    segwit = transaction.getSegwitFlag()
+    UTXOs = transaction.getUTXOs()
 
     #Loop on each input transaction we need to sign and generate signatures
     txIndex = 0
+    amount = None
     for tx in bitcoin.getTransactionInputs(rawTransactionHex):
-        signature = bitcoin.signUTXO(privateKey,rawTransactionHex,txIndex,redeemScript)
+        if segwit:
+            amount = [a for a in UTXOs if a[Output.TRANSACTION_ID] == tx.txid][0][Output.AMOUNT]
+        signature = bitcoin.signUTXO(privateKey,rawTransactionHex,txIndex,redeemScript,segwit,amount)
         transaction.addSignature(keyName,signature,tx.txid)
         txIndex += 1
 
@@ -274,7 +283,7 @@ def createdSignedTransaction(transaction,bitcoin:Bitcoin,savePath:str):
         signatures[tx.txid] = scriptSig
 
     #Add signatures in the transaction :
-    signedTransaction = bitcoin.addSignaturesToTransaction(unsignedTransaction,signatures)
+    signedTransaction = bitcoin.addSignaturesToTransaction(unsignedTransaction,signatures,transaction.getSegwitFlag())
 
     transaction.addSignedTransaction(signedTransaction)
 

@@ -17,3 +17,4 @@ KEY_NAME_NOT_FOUND = lambda keyName:Exception(f"Key name '{keyName}' doesn't see
 FAILED_TO_LOAD_JSON = Exception("Failed to load JSON file. Maybe the provided data are not in JSON format.")
 INVALID_PUBLIC_KEY = lambda publicKey:Exception(f"Public key '{publicKey}' is invalid")
 NOT_CORRECT_FILE = lambda property:Exception(f"The file is not correct. It doesn't contain the property '{property}'.")
+NO_UTXO_AMOUNT_SEGWIT = Exception("Can not sign segwit UTXO without providing the amount")

@@ -16,6 +16,7 @@ class Output:
     NAME = 'name'
     KEYS = 'keys'
     ADDRESS = 'address'
+    SEGWIT = 'segwit'
     PUBLIC_KEY = 'public'
     PRIVATE_KEY = 'private'
     SIGNATURES_REQUIRED = 'signatures_required'
@@ -28,7 +29,6 @@ class Output:
     AMOUNT = "amount"
     SIGNATURE = "signature"
     SIGNATURES = "signatures"
-    P2PKH_ADDRESS = "P2PKH"
     MULTISIG_ADDRESS = "multisig_address"
     MULTISIG_TRANSACTION = "multisig_transaction"
     EXCEPTION = "exception"
@@ -78,7 +78,7 @@ class Output:
         if privateKey != None and password != None:
             privateKey = Security.encrypt(privateKey,password)
 
-        if self.output[Output.TYPE] == Output.P2PKH_ADDRESS:
+        if self.output[Output.TYPE] == Output.ADDRESS:
             #If wallet with a single P2PKH address, don't create list
             if not Output.KEYS in self.output: self.output[Output.KEYS] = {}
             self.output[Output.KEYS][Output.NAME] = name
@@ -156,6 +156,12 @@ class Output:
             }
         )
 
+    def addUtxos(self,utxos:list):
+        for utxo in utxos:
+            if not(Output.TRANSACTION_ID in utxo and Output.PREVIOUS_TRANSACTION_UTXO_INDEX in utxo and Output.AMOUNT in utxo):
+                continue
+            self.addUtxo(utxo[Output.TRANSACTION_ID],utxo[Output.PREVIOUS_TRANSACTION_UTXO_INDEX],utxo[Output.AMOUNT])
+
     def addKeyName(self,keyName):
         '''
         Add the name of the key.
@@ -217,11 +223,29 @@ class Output:
         '''
         self.addValue(Output.BALANCE,balance)
 
+    def addSegwitFlag(self,hasSegwit:bool):
+        '''
+        Add a segwit flag to true of false depending if the transaction has segwit inputs or not
+        '''
+        self.addValue(Output.SEGWIT,hasSegwit)
+
     def addValue(self,parameter,value):
         '''
         Add a value for the given parameter in the Output instance
         '''
         self.output[parameter] = value
+
+#==========================#
+# Remove value from output #
+#==========================#=======================================
+    def removeUTXOs(self):
+        self.removeProperty(Output.UTXOS)
+
+    def removeProperty(self,property):
+        try:
+            self.output.pop(property, None)
+        except:
+            pass
 
 #============================#
 # Get parameters from output #
@@ -243,7 +267,7 @@ class Output:
         '''
         Returns the private key decrypted if any. Currently only Output instances of type Output.P2PKH_ADDRESS are expected to contain private keys
         '''
-        if self.output[Output.TYPE] != Output.P2PKH_ADDRESS:
+        if self.output[Output.TYPE] != Output.ADDRESS:
             return None #Only wallets with P2PKH addresses contains the private key
         try:
             privateKey = Security.decrypt(self.output[Output.KEYS][Output.PRIVATE_KEY],password)
@@ -354,6 +378,13 @@ class Output:
         '''
         UTXOs = self.getValue(Output.UTXOS)
         return UTXOs if UTXOs != None else []
+
+    def getSegwitFlag(self) -> bool:
+        '''
+        Returns true or false depending on the value of the segwit flag
+        '''
+        hasSegwit = self.getValue(Output.SEGWIT)
+        return hasSegwit if hasSegwit != None else False
 
     def getValue(self,parameter):
         '''
