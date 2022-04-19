@@ -36,7 +36,7 @@ MultiSigBTC is a tool that can be used to create and maintain multi signature ad
 
 ### Command : create_new_address
 
-    MultiSigBTC.py create_new_address [-h] [-s SEED] keyName password
+    MultiSigBTC.py create_new_address [-h] [-s SEED] [-t Address Type] keyName password
 
 #### Description:
 Create a new private-public key pair along with its legacy bitcoin address
@@ -50,11 +50,12 @@ Create a new private-public key pair along with its legacy bitcoin address
 |--|--|
 |  -h, --help | show help exit|
 | -s SEED, --seed SEED | The seed used for the random generator (a specific seed produces the same address)|
+| -t, --address_type| The type of the generated address (legacy or segwit)|
 
 
 ### Command : create_multisig_address
 
-    MultiSigBTC.py create_multisig_address [-h] signaturesRequired keyfile [keyfile ...]
+    MultiSigBTC.py create_multisig_address [-h] [-t Address Type] signaturesRequired keyfile [keyfile ...]
 
 ### Description : 
 Create a multi signature address given the public keys you want to be involved
@@ -69,6 +70,7 @@ Create a multi signature address given the public keys you want to be involved
 ||Description|
 |--|--|
 |-h, --help | show help and exit |
+| -t, --address_type| The type of the generated address (legacy or segwit)|
 
 
 ### Command : create_multisig_transaction
